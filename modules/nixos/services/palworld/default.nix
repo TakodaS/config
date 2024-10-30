@@ -6,8 +6,7 @@
   namespace,
   lib,
   ...
-}:
-let
+}: let
   cfg = config.${namespace}.services.palworld;
 
   steam-id = "2394010";
@@ -27,8 +26,7 @@ let
   steamcmd-home = config.users.users.${cfg.steamcmd.name}.home;
 
   steamcmd-install-service = "steamcmd@${steam-id}.service";
-in
-{
+in {
   options.${namespace}.services.palworld = {
     enable = lib.mkEnableOption "Palworld server";
 
@@ -74,11 +72,11 @@ in
   };
 
   config = lib.mkIf cfg.enable {
-    plusultra.services.steam.enable = true;
+    ${namespace}.services.steam.enable = true;
 
-    networking.firewall.allowedTCPPorts = [ cfg.port ];
+    networking.firewall.allowedTCPPorts = [cfg.port];
 
-    networking.firewall.allowedUDPPorts = [ cfg.port ];
+    networking.firewall.allowedUDPPorts = [cfg.port];
 
     users = {
       users = lib.optionalAttrs (cfg.user.name == "palworld") {
@@ -89,11 +87,11 @@ in
           homeMode = "750";
           group = cfg.user.group;
 
-          extraGroups = [ cfg.steamcmd.group ];
+          extraGroups = [cfg.steamcmd.group];
         };
       };
 
-      groups = lib.optionalAttrs (cfg.user.group == "palworld") { palworld = { }; };
+      groups = lib.optionalAttrs (cfg.user.group == "palworld") {palworld = {};};
     };
 
     systemd.tmpfiles.rules = [
@@ -102,14 +100,14 @@ in
     ];
 
     systemd.services.palworld = {
-      path = [ pkgs.xdg-user-dirs ];
+      path = [pkgs.xdg-user-dirs];
 
       # Manually start the server if needed, to save resources.
       wantedBy = lib.optional cfg.autostart "network-online.target";
 
       # Install the game before launching.
-      wants = [ steamcmd-install-service ];
-      after = [ steamcmd-install-service ];
+      wants = [steamcmd-install-service];
+      after = [steamcmd-install-service];
 
       serviceConfig = {
         ExecStart = palworld-server;
